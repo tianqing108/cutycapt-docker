@@ -39,10 +39,10 @@ func Run(cmdPath string,args ...string) (string,string,error) {
 	}
 	return out.String(),outErr.String(),nil
 }
-func GetCutyParms(params []string,r *http.Request, key string, defaultVal string) string {
+func GetCutyParms(params []string,r *http.Request, key string, defaultVal string) []string {
 	p:=fmt.Sprintf("--%s=%s",key,GetQuery(r,key,defaultVal))
 	params = append(params,p)
-	return p
+	return params
 }
 func GetQuery(r *http.Request, key string, defaultVal string) string {
 	values, ok := r.URL.Query()[key]
@@ -63,13 +63,13 @@ func HandlerCutyCapt(w http.ResponseWriter,r *http.Request)  {
 
 	params = append(params,"CutyCapt")
 
-	GetCutyParms(params,r,"url","")
-	GetCutyParms(params,r,"min-width","720")
-	GetCutyParms(params,r,"min-height","200")
-	GetCutyParms(params,r,"javascript","on")
-	GetCutyParms(params,r,"delay","3000")
-	GetCutyParms(params,r,"max-wait","20000")
-	GetCutyParms(params,r,"out-format","png")
+	params = GetCutyParms(params,r,"url","")
+	params = GetCutyParms(params,r,"min-width","720")
+	params = GetCutyParms(params,r,"min-height","200")
+	params = GetCutyParms(params,r,"javascript","on")
+	params = GetCutyParms(params,r,"delay","3000")
+	params = GetCutyParms(params,r,"max-wait","20000")
+	params = GetCutyParms(params,r,"out-format","png")
 
 	of:=GetQuery(r,"out-format","png")
 
@@ -78,9 +78,11 @@ func HandlerCutyCapt(w http.ResponseWriter,r *http.Request)  {
 
 	params = append(params,"--out="+outName)
 
+	log.Println(strings.Join(params," "))
 	_,_,err:=Run("xvfb-run",params...)
 	if err!=nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 	if FileExist(outName) {
@@ -88,6 +90,7 @@ func HandlerCutyCapt(w http.ResponseWriter,r *http.Request)  {
 		if err!=nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w,err.Error())
+			log.Println(err.Error())
 			return
 		}
 		w.Header().Set("content-type", "image/"+of)
