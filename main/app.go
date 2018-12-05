@@ -2,7 +2,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -21,28 +20,12 @@ func FileExist(filePath string) bool {
 	}
 	return false
 }
-func Run(cmdPath string,args ...string) (string,string,error) {
-
-	var out bytes.Buffer
-	var outErr bytes.Buffer
-	cmd:=exec.Command(cmdPath,args...)
-	cmd.Stdout = &out
-	cmd.Stderr = &outErr
-
-	err := cmd.Start()
-	if err!=nil {
-		return "","",err
-	}
-	err = cmd.Wait()
-	if err!=nil {
-		return "","",err
-	}
-	return out.String(),outErr.String(),nil
-}
 func GetCutyParms(params []string,r *http.Request, key string, defaultVal string) []string {
-	p:=fmt.Sprintf("--%s=%s",key,GetQuery(r,key,defaultVal))
-	params = append(params,p)
-	return params
+	v:=GetQuery(r,key,defaultVal)
+	if len(v) == 0 {
+		return params
+	}
+	return append(params,fmt.Sprintf("--%s=%s",key,v))
 }
 func GetQuery(r *http.Request, key string, defaultVal string) string {
 	values, ok := r.URL.Query()[key]
@@ -59,34 +42,55 @@ func HandlerCutyCapt(w http.ResponseWriter,r *http.Request)  {
 	}
 	params:=make([]string,0)
 
+	params = append(params,"xvfb-run")
 	params = append(params,"--server-args=\"-screen 0, 1920x1080x24\"")
 
 	params = append(params,"CutyCapt")
 
-	params = GetCutyParms(params,r,"url","")
-	params = GetCutyParms(params,r,"min-width","720")
-	params = GetCutyParms(params,r,"min-height","200")
-	params = GetCutyParms(params,r,"javascript","on")
-	params = GetCutyParms(params,r,"delay","3000")
-	params = GetCutyParms(params,r,"max-wait","20000")
-	params = GetCutyParms(params,r,"out-format","png")
+	params = append(params,fmt.Sprintf("--url=\"%s\"",url))
 
 	of:=GetQuery(r,"out-format","png")
-
 	os.Mkdir("/tmp",0666)
 	outName:=fmt.Sprintf("/tmp/%d.%s",time.Now().UnixNano(),of)
-
 	params = append(params,"--out="+outName)
 
-	log.Println(strings.Join(params," "))
-	out,outErr,err:=Run("xvfb-run",params...)
+	params = GetCutyParms(params,r,"out-format","png")
+	params = GetCutyParms(params,r,"min-width","800")
+	params = GetCutyParms(params,r,"min-height","600")
+	params = GetCutyParms(params,r,"max-wait","30000")
+	params = GetCutyParms(params,r,"delay","0")
+	params = GetCutyParms(params,r,"user-style-path","")
+	params = GetCutyParms(params,r,"header","")
+	params = GetCutyParms(params,r,"method","get")
+	params = GetCutyParms(params,r,"body-string","")
+	params = GetCutyParms(params,r,"body-base64","")
+	params = GetCutyParms(params,r,"app-name","")
+	params = GetCutyParms(params,r,"app-version","")
+	params = GetCutyParms(params,r,"user-agent","")
+	params = GetCutyParms(params,r,"javascript","on")
+	params = GetCutyParms(params,r,"java","off")
+	params = GetCutyParms(params,r,"plugins","off")
+	params = GetCutyParms(params,r,"private-browsing","off")
+	params = GetCutyParms(params,r,"auto-load-images","on")
+	params = GetCutyParms(params,r,"js-can-open-windows","off")
+	params = GetCutyParms(params,r,"js-can-access-clipboard","off")
+	params = GetCutyParms(params,r,"print-backgrounds","off")
+	params = GetCutyParms(params,r,"zoom-factor","")
+	params = GetCutyParms(params,r,"zoom-text-only","off")
+	params = GetCutyParms(params,r,"http-proxy","")
+
+
+	cmdStr:=strings.Join(params," ")
+
+	log.Println(cmdStr)
+	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
 	if err!=nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w,err.Error())
 		log.Println(err.Error())
-		log.Println(out)
-		log.Println(outErr)
-
 		return
 	}
 	if FileExist(outName) {
@@ -102,8 +106,7 @@ func HandlerCutyCapt(w http.ResponseWriter,r *http.Request)  {
 	}else{
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w,"convert err")
-		fmt.Fprint(w,"convert err")
-
+		log.Println("convert err")
 	}
 
 }
