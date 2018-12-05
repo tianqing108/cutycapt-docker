@@ -73,16 +73,20 @@ func HandlerCutyCapt(w http.ResponseWriter,r *http.Request)  {
 
 	of:=GetQuery(r,"out-format","png")
 
-	os.Mkdir("tmp",0666)
-	outName:=fmt.Sprintf("tmp/%d.%s",time.Now().UnixNano(),of)
+	os.Mkdir("/tmp",0666)
+	outName:=fmt.Sprintf("/tmp/%d.%s",time.Now().UnixNano(),of)
 
 	params = append(params,"--out="+outName)
 
 	log.Println(strings.Join(params," "))
-	_,_,err:=Run("xvfb-run",params...)
+	out,outErr,err:=Run("xvfb-run",params...)
 	if err!=nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w,err.Error())
 		log.Println(err.Error())
+		log.Println(out)
+		log.Println(outErr)
+
 		return
 	}
 	if FileExist(outName) {
@@ -97,6 +101,7 @@ func HandlerCutyCapt(w http.ResponseWriter,r *http.Request)  {
 		w.Write(contents)
 	}else{
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w,"convert err")
 		fmt.Fprint(w,"convert err")
 
 	}
