@@ -1,4 +1,5 @@
 
+# Use http method to use CutyCapt with docker build
 
 ## start container
 
