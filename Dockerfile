@@ -5,4 +5,5 @@ RUN yum install -y epel-release \
   && yum install -y mesa-dri-drivers \
   && yum install -y qtwebkit-devel \
   && yum install -y qt-devel \
-  && yum install -y CutyCapt
+  && yum install -y CutyCapt \
+  && dbus-uuidgen > /var/lib/dbus/machine-id
