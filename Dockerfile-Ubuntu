@@ -1,0 +1,3 @@
+FROM ubuntu14.04-update:latest
+
+RUN  apt-get install -y Xvfb
