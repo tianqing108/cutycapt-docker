@@ -46,7 +46,7 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 	params = append(params, "xvfb-run")
 	params = append(params, "--server-args=\"-screen 0, 1920x1080x24\"")
 
-	params = append(params, "CutyCapt")
+	params = append(params, "cutycapt")
 
 	params = append(params, fmt.Sprintf("--url=\"%s\"", url))
 
