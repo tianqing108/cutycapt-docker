@@ -47,3 +47,11 @@ http://127.0.0.1/cutycapt?url=http://www.baidu.com&delay=3000
   - zoom-factor=<float>          Page zoom factor (default: no zooming)       
   - zoom-text-only=<on|off>      Whether to zoom only the text (default: off) 
   - http-proxy=<url>             Address for HTTP proxy server (default: none)
+  
+## css fonts name
+
+- simkai.ttf = KaiTi
+- simfang.ttf = FangSong
+- simhei.ttf = SimHei
+- simsun.ttc = SimSun
+- SIMYOU.TTF= YouYuan
