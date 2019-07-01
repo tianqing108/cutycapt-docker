@@ -10,9 +10,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 )
+
+const WIN_BIN="C:\\YaleSoftFiles\\Develop\\CutyCapt-Win32-2010-04-26\\CutyCapt.exe"
 
 func FileExist(filePath string) bool {
 	_, err := os.Stat(filePath)
@@ -43,16 +46,23 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 	}
 	params := make([]string, 0)
 
-	params = append(params, "xvfb-run")
-	params = append(params, "--server-args=\"-screen 0, 1920x1080x24\"")
+	if runtime.GOOS == "windows" {
+		params = append(params, WIN_BIN)
+	}else{
+		params = append(params, "xvfb-run")
+		params = append(params, "--server-args=\"-screen 0, 1920x1080x24\"")
+		params = append(params, "CutyCapt")
+	}
 
-	params = append(params, "CutyCapt")
+
 
 	params = append(params, fmt.Sprintf("--url=\"%s\"", url))
 
 	of := GetQuery(r, "out-format", "png")
-	os.Mkdir("/tmp", 0666)
-	outName := fmt.Sprintf("/tmp/%d.%s", time.Now().UnixNano(), of)
+	os.Mkdir("tmp", 0666)
+
+
+	outName := fmt.Sprintf("G:\\tmp\\cutycapt\\%d.%s",time.Now().UnixNano(), of)
 	params = append(params, "--out="+outName)
 
 	params = GetCutyParms(params, r, "out-format", "png")
@@ -83,7 +93,13 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 	cmdStr := strings.Join(params, " ")
 
 	log.Println(cmdStr)
-	cmd := exec.Command("sh", "-c", cmdStr)
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command(cmdStr)
+	}else{
+		cmd = exec.Command("sh", "-c", cmdStr)
+	}
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
