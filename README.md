@@ -5,8 +5,8 @@
 
 ```bash
 
-#:docker pull yale8848/cutycapt-docker:latest
-#:docker run --name url2image -p 9600:9600 yale8848/cutycapt-docker:latest
+#:docker pull yale8848/cutycapt-docker:v1
+#:docker run --name url2image -p 9600:9600 yale8848/cutycapt-docker:v1
 
 ```
 
