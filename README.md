@@ -1,10 +1,10 @@
 
-# CutyCapt and Java8 Docker
+# CutyCapt Docker
 
 ## start container
 
 ```bash
 
-#:docker pull yale8848/cutycapt-java8:v1
+#:docker pull yale8848/cutycapt:v1
 
 ```
