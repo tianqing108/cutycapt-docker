@@ -1,10 +1,4 @@
-FROM golang AS builder
-ADD . /go/src/github.com/yale8848/cutycapt-docker/
-RUN cd /go/src/github.com/yale8848/cutycapt-docker \
-  && CGO_ENABLED=0 GOOS=linux go build ./main/app.go
-
 FROM centos
-COPY --from=builder /go/src/github.com/yale8848/cutycapt-docker/app /bin/app
 
 RUN yum install -y epel-release \
   && yum install -y Xvfb \
@@ -18,5 +12,6 @@ RUN yum install -y epel-release \
 COPY fonts /usr/share/fonts/win
 RUN  chmod 644 /usr/share/fonts/win/* && mkfontscale && mkfontdir && fc-cache -fv
 
-EXPOSE 9600
-ENTRYPOINT ["/bin/app"]
+RUN yum -y install java-1.8.0-openjdk-devel.x86_64
+
+ENTRYPOINT ["java"]
