@@ -5,6 +5,6 @@
 
 ```bash
 
-#:docker pull yale8848/cutycapt:v1
+#:docker pull yale8848/cutycapt-java8:v1
 
 ```

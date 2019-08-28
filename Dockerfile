@@ -12,4 +12,6 @@ RUN yum install -y epel-release \
 COPY fonts /usr/share/fonts/win
 RUN  chmod 644 /usr/share/fonts/win/* && mkfontscale && mkfontdir && fc-cache -fv
 
-ENTRYPOINT ["CutyCapt"]
+RUN yum -y install java-1.8.0-openjdk-devel.x86_64
+
+ENTRYPOINT ["java"]
