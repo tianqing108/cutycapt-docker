@@ -2,7 +2,7 @@
 # Use http method to use CutyCapt with docker build
 
 
-[cutycapt-java8 docker](https://github.com/yale8848/cutycapt-docker/tree/cutycapt)
+[cutycapt docker](https://github.com/yale8848/cutycapt-docker/tree/cutycapt)
 
 [cutycapt-java8 docker](https://github.com/yale8848/cutycapt-docker/tree/cutycapt-java8)
 
