@@ -13,5 +13,3 @@ COPY fonts /usr/share/fonts/win
 RUN  chmod 644 /usr/share/fonts/win/* && mkfontscale && mkfontdir && fc-cache -fv
 
 RUN yum -y install java-1.8.0-openjdk-devel.x86_64
-
-ENTRYPOINT ["java"]
