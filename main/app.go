@@ -37,7 +37,7 @@ func GetQuery(r *http.Request, key string, defaultVal string) string {
 }
 func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 	url := GetQuery(r, "url", "")
-	if len(url) == 0 || !strings.HasPrefix(url, "http") {
+	if len(url) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -51,8 +51,12 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 	params = append(params, fmt.Sprintf("--url=\"%s\"", url))
 
 	of := GetQuery(r, "out-format", "png")
+	deleteTmpFile := GetQuery(r, "deleteTmpFile", "1")
+	stream := GetQuery(r, "stream", "1")
+
 	os.Mkdir("/tmp", 0666)
-	outName := fmt.Sprintf("/tmp/%d.%s", time.Now().UnixNano(), of)
+	fName := fmt.Sprintf("%d.%s", time.Now().UnixNano(), of)
+	outName := "/tmp/"+fName
 	params = append(params, "--out="+outName)
 
 	params = GetCutyParms(params, r, "out-format", "png")
@@ -95,17 +99,30 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if FileExist(outName) {
-		contents, err := ioutil.ReadFile(outName)
-		defer os.Remove(outName)
 
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, err.Error())
-			log.Println(err.Error())
+		if deleteTmpFile == "1"{
+			defer os.Remove(outName)
+		}
+
+		w.Header().Set("tmpFileName", fName)
+
+		if stream == "1"{
+			contents, err := ioutil.ReadFile(outName)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprint(w, err.Error())
+				log.Println(err.Error())
+				return
+			}
+	
+			w.Header().Set("content-type", "image/"+of)
+			w.Write(contents)
+		}else{
+			w.WriteHeader(http.StatusOK)
+			w.Write(nil)
 			return
 		}
-		w.Header().Set("content-type", "image/"+of)
-		w.Write(contents)
+		
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "convert err")
