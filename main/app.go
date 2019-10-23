@@ -14,6 +14,11 @@ import (
 	"time"
 )
 
+const TmpDir = "/tmp"
+func init()  {
+	os.Mkdir(TmpDir, 0666)
+}
+
 func FileExist(filePath string) bool {
 	_, err := os.Stat(filePath)
 	if err == nil {
@@ -36,15 +41,44 @@ func GetQuery(r *http.Request, key string, defaultVal string) string {
 	return defaultVal
 }
 func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
-	url := GetQuery(r, "url", "")
-	if len(url) == 0 {
+
+	var url string
+	
+	if strings.ToLower(r.Method) == "get" {
+
+		url = GetQuery(r, "url", "")
+		if len(url) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	} else if strings.ToLower(r.Method) == "post" {
+		err:=r.ParseForm()
+		if err!=nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		html:=r.PostForm.Get("html")
+		if len(html) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		htmlTmpPath:=fmt.Sprintf(TmpDir+"/html_%d.html",time.Now().UnixNano())
+		ioutil.WriteFile(htmlTmpPath,[]byte(html),0666)
+
+		url = "file://"+htmlTmpPath
+		
+		defer func() {
+			defer os.Remove(htmlTmpPath)
+		}()
+	}else{
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+
 	params := make([]string, 0)
 
-	params = append(params, "xvfb-run")
-	params = append(params, "--server-args=\"-screen 0, 1920x1080x24\"")
 
 	params = append(params, "CutyCapt")
 
@@ -54,9 +88,9 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 	deleteTmpFile := GetQuery(r, "deleteTmpFile", "1")
 	stream := GetQuery(r, "stream", "1")
 
-	os.Mkdir("/tmp", 0666)
+
 	fName := fmt.Sprintf("%d.%s", time.Now().UnixNano(), of)
-	outName := "/tmp/"+fName
+	outName := TmpDir+"/"+fName
 	params = append(params, "--out="+outName)
 
 	params = GetCutyParms(params, r, "out-format", "png")
@@ -114,7 +148,7 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 				log.Println(err.Error())
 				return
 			}
-	
+
 			w.Header().Set("content-type", "image/"+of)
 			w.Write(contents)
 		}else{
@@ -122,7 +156,7 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 			w.Write(nil)
 			return
 		}
-		
+
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "convert err")
