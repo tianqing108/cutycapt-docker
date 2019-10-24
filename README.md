@@ -10,8 +10,8 @@
 
 ```bash
 
-#:docker pull yale8848/cutycapt-docker:v5
-#:docker run --name url2img -p 9600:9600 -e DISPLAY=:0 yale8848/cutycapt-docker:v5
+#:docker pull yale8848/cutycapt-docker:v6
+#:docker run --name url2img -p 9600:9600 yale8848/cutycapt-docker:v6
 
 ```
 
