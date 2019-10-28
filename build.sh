@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t yale8848/cutycapt-docker:v6_font2 .
+docker build -t yale8848/cutycapt-docker:ubuntu_v1 .

@@ -1,13 +1,7 @@
-FROM centos
+FROM ubuntu:14.04
 
-RUN yum install -y epel-release \
-  && yum install -y Xvfb \
-  && yum install -y xorg-x11-fonts* \
-  && yum install -y mesa-dri-drivers \
-  && yum install -y qtwebkit-devel \
-  && yum install -y qt-devel \
-  && yum install -y CutyCapt \
-  && dbus-uuidgen > /var/lib/dbus/machine-id
+RUN sudo apt-get update \
+  && apt-get -y install xfonts-100dpi xfonts-75dpi xfonts-cyrillic xorg dbus-x11 libqt4-webkit libqt4-dev g++ xvfb cutycapt
 
 COPY fonts /usr/share/fonts/win
 RUN  chmod 644 /usr/share/fonts/win/* && mkfontscale && mkfontdir && fc-cache -fv

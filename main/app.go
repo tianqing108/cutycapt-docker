@@ -80,7 +80,7 @@ func HandlerCutyCapt(w http.ResponseWriter, r *http.Request) {
 	params := make([]string, 0)
 
 
-	params = append(params, "CutyCapt")
+	params = append(params, "cutycapt")
 
 	params = append(params, fmt.Sprintf("--url=\"%s\"", url))
 
